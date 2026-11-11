@@ -1,27 +1,3 @@
 
-cookie clicker with save data 
-
-1. auto save with objects and when page gets closed the data will be put in the database with the user and if the person is not logged in it will be saved in his session 
-
-2. export and important save files
-
-
-first version:
-main class = user
-cookies = user-> cookies
-cookies = user-> ClickPower
-
-
-
-inventory = user-> inventory
-buy = user -> buy
-sell = user-> sell
-
-
-first make a page for every function, than 
-
-function hallo(1, 2) {
-    1 = click
-    2 = waar neergezet 
-}
-
+what next:
+2. add array
