@@ -1,73 +1,72 @@
 <?php
 
+namespace user;
+
 class SaveFile
 {
+    // cost   = cookies to buy
+    // amount = cookies-per-second it adds
+    private const ITEMS = [
+        'clicker' => ['cost' => 10,   'amount' => 0.1],
+        'grandma' => ['cost' => 100,  'amount' => 1],
+        'farm'    => ['cost' => 1000, 'amount' => 10],
+    ];
 
-    // make it an array 
-    public int $clicker = 0;
-    public int $grandma = 0;
-    public int $farm = 0;
+    // All that the user owns ['clicker' => 0, 'grandma' => 0, 'farm' => 0]
+    public array $items = [];
 
     public function __construct()
     {
-        // Initialize or load Clickers
-        if (isset($_SESSION['clicker'])) {
-            $this->clicker = $_SESSION['clicker'];
-        } else {
-            $_SESSION['clicker'] = 0;
-        }
+        // if empty make it 0
+        $defaults = array_map(fn() => 0, self::ITEMS);
 
-        // Initialize or load Grandmas
-        if (isset($_SESSION['grandma'])) {
-            $this->grandma = $_SESSION['grandma'];
+        //the session will become the default 
+        if (isset($_SESSION['items']) && is_array($_SESSION['items'])) {
+            $this->items = array_merge($defaults, $_SESSION['items']);
         } else {
-            $_SESSION['grandma'] = 0;
+            $this->items = $defaults;
         }
+        $_SESSION['items'] = $this->items;
 
-        // Initialize or load Farms
-        if (isset($_SESSION['farm'])) {
-            $this->farm = $_SESSION['farm'];
-        } else {
-            $_SESSION['farm'] = 0;
-        }
+        // Make sure the shared counters exist
+        $_SESSION['cookies'] = $_SESSION['cookies'] ?? 0;
+        $_SESSION['cp']      = $_SESSION['cp']      ?? 0;
     }
 
-    // Now correctly returns your actual cookie balance
+    // Current cookie balance
     public function getAmount(): int
     {
         return $_SESSION['cookies'] ?? 0;
     }
 
-    // buy will get the name of the thing you want to buy and look for the price of it 
-    // clicker = 10 
-    // grandma = 100
-    // farm = 1000
-    public function buy($name)
+    // Count of one item, e.g. $save->get('grandma')
+    public function get(string $name): int
     {
+        return $this->items[$name] ?? 0;
+    }
 
-        // Fixed cost & reward per item
-        $items = [
-            'clicker' => ['cost' => 10,   'amount' => 0.1],
-            'grandma' => ['cost' => 100,  'amount' => 1],
-            'farm'    => ['cost' => 1000, 'amount' => 10],
-        ];
-
-        // Guard: unknown item
-        if (!isset($items[$name])) {
+    // buys item if you have more than anough
+    public function buy(string $name): bool
+    {
+        // is item real?
+        if (!isset(self::ITEMS[$name])) {
             return false;
         }
+        // looks up cost and amount
+        $cost   = self::ITEMS[$name]['cost'];
+        $amount = self::ITEMS[$name]['amount'];
 
-        $cost   = $items[$name]['cost'];
-        $amount = $items[$name]['amount'];
-
-        // Guard: not enough cookies
-        if ($_SESSION['cookies'] < $cost) {
+        // not enough cookies?
+        if (($_SESSION['cookies'] ?? 0) < $cost) {
             return false;
         }
 
         // Buy it
         $_SESSION['cookies'] -= $cost;
-        $_SESSION['cp'] += $amount;
+        $_SESSION['cp']      = ($_SESSION['cp'] ?? 0) + $amount;
+
+        $this->items[$name]++;
+        $_SESSION['items'] = $this->items;
 
         return true;
     }

@@ -1,4 +1,7 @@
 <?php
+
+namespace cookies;
+
 class ClickPower
 {
     public int $cp = 1; // Click power default
