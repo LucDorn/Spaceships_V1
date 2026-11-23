@@ -22,8 +22,9 @@ async function send(action, extra = {}) {
 function updateUI(data) {
     if (data.amount !== undefined) amountEl.textContent = Math.floor(data.amount);
     if (data.clickPower !== undefined) clickPowEl.textContent = data.clickPower;
-    if (data.perSecond !== undefined) perSecEl.textContent = data.perSecond.toFixed(1);
+    if (data.perSecond !== undefined) perSecEl.textContent = Math.floor(data.perSecond);
 }
+
 
 function toonStatus(tekst, soort = 'info') {
     statusEl.textContent = tekst;

@@ -6,35 +6,35 @@ namespace user;
 
 final class SaveFile
 {
-    private float $amount;
+    private int $amount;
 
     public function __construct()
     {
-        $this->amount = (float) ($_SESSION['cookies'] ?? 0);
+        $this->amount = (int) ($_SESSION['cookies'] ?? 0);
     }
 
-    public function getAmount(): float
+    public function getAmount(): int
     {
         return $this->amount;
     }
 
-    public function setAmount(float $amount): void
+    public function setAmount(int $amount): void
     {
-        $this->amount = max(0.0, $amount);
+        $this->amount = max(0, $amount);
         $_SESSION['cookies'] = $this->amount;
     }
 
-    public function addAmount(float $amount): void
+    public function addAmount(int $amount): void
     {
         $this->setAmount($this->amount + $amount);
     }
 
-    public function subtractAmount(float $amount): void
+    public function subtractAmount(int $amount): void
     {
         $this->setAmount($this->amount - $amount);
     }
 
-    public function kanBetalen(float $kost): bool
+    public function kanBetalen(int $kost): bool
     {
         return $this->amount >= $kost;
     }

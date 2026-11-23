@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-
+// session_destroy();
 ob_start();
 session_start();
 
@@ -25,7 +25,7 @@ $ClickPower = new ClickPower($SaveFile);
 $Shop       = new Registry();
 
 // Passieve inkomsten syncen op basis van verstreken tijd
-$ClickPower->syncTime();
+// $ClickPower->syncTime();
 
 $action = $_POST['action'] ?? '';
 

@@ -14,6 +14,6 @@ use user\SaveFile;
 interface Koopbaar
 {
     public function getNaam(): string;
-    public function getKost(): float;
+    public function getKost(): int;
     public function pasToe(ClickPower $clickPower, SaveFile $save): void;
 }

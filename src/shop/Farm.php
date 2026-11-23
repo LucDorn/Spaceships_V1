@@ -13,13 +13,13 @@ final class Farm implements Koopbaar
     {
         return 'farm';
     }
-    public function getKost(): float
+    public function getKost(): int
     {
-        return 1000.0;
+        return 1000;
     }
 
     public function pasToe(ClickPower $clickPower, SaveFile $save): void
     {
-        $clickPower->verhoogPerSecond(10.0);
+        $clickPower->verhoogPerSecond(10);
     }
 }

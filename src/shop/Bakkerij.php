@@ -13,13 +13,13 @@ final class Bakkerij implements Koopbaar
     {
         return 'bakkerij';
     }
-    public function getKost(): float
+    public function getKost(): int
     {
-        return 5000.0;
+        return 5000;
     }
 
     public function pasToe(ClickPower $clickPower, SaveFile $save): void
     {
-        $clickPower->verhoogPerSecond(50.0);
+        $clickPower->verhoogPerSecond(50);
     }
 }

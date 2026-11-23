@@ -13,13 +13,13 @@ final class Grandma implements Koopbaar
     {
         return 'grandma';
     }
-    public function getKost(): float
+    public function getKost(): int
     {
-        return 100.0;
+        return 100;
     }
 
     public function pasToe(ClickPower $clickPower, SaveFile $save): void
     {
-        $clickPower->verhoogPerSecond(1.0);
+        $clickPower->verhoogPerSecond(1);
     }
 }

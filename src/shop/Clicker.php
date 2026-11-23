@@ -13,9 +13,9 @@ final class Clicker implements Koopbaar
     {
         return 'clicker';
     }
-    public function getKost(): float
+    public function getKost(): int
     {
-        return 10.0;
+        return 10;
     }
 
     public function pasToe(ClickPower $clickPower, SaveFile $save): void

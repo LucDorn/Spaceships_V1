@@ -8,13 +8,13 @@ use user\SaveFile;
 
 final class ClickPower
 {
-    private float $clickPower;
-    private float $perSecond;
+    private int $clickPower;
+    private int $perSecond;
 
     public function __construct(private SaveFile $save)
     {
-        $this->clickPower = (float) ($_SESSION['clickPower'] ?? 1.0);
-        $this->perSecond  = (float) ($_SESSION['perSecond']  ?? 0.0);
+        $this->clickPower = (int) ($_SESSION['clickPower'] ?? 1);
+        $this->perSecond  = (int) ($_SESSION['perSecond'] ?? 0);
     }
 
     /** Eén klik: voeg clickPower cookies toe aan het totaal. */
@@ -30,9 +30,9 @@ final class ClickPower
     public function syncTime(): void
     {
         $now  = microtime(true);
-        $last = (float) ($_SESSION['last_tick'] ?? $now);
+        $last = (int) ($_SESSION['last_tick'] ?? $now);
 
-        $elapsed = max(0.0, $now - $last);
+        $elapsed = max(0, $now - $last);
 
         if ($this->perSecond > 0) {
             $this->save->addAmount($this->perSecond * $elapsed);
@@ -41,11 +41,11 @@ final class ClickPower
         $_SESSION['last_tick'] = $now;
     }
 
-    public function getAmount(): float
+    public function getAmount(): int
     {
         return $this->clickPower;
     }
-    public function getPerSecond(): float
+    public function getPerSecond(): int
     {
         return $this->perSecond;
     }
@@ -56,13 +56,13 @@ final class ClickPower
         $_SESSION['clickPower'] = $this->clickPower;
     }
 
-    public function verhoogClickPower(float $x): void
+    public function verhoogClickPower(int $x): void
     {
         $this->clickPower += $x;
         $_SESSION['clickPower'] = $this->clickPower;
     }
 
-    public function verhoogPerSecond(float $x): void
+    public function verhoogPerSecond(int $x): void
     {
         $this->perSecond += $x;
         $_SESSION['perSecond'] = $this->perSecond;
