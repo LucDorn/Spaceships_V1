@@ -1,7 +1,9 @@
 <?php
 
-/**
- * Eenvoudige autoloader: namespace → bestandspad.
+declare(strict_types=1);
+
+/** hoe het werkt met functie oproepingg
+ *  namespace → bestandspad.
  *
  *   cookies\ClickPower   →  src/cookies/ClickPower.php
  *   user\SaveFile        →  src/user/SaveFile.php

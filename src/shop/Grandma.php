@@ -20,7 +20,6 @@ final class Grandma implements Koopbaar
 
     public function pasToe(ClickPower $clickPower, SaveFile $save): void
     {
-        // Oma bakte vroeger koekjes: +1 per seconde.
         $clickPower->verhoogPerSecond(1.0);
     }
 }

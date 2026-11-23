@@ -20,7 +20,6 @@ final class Farm implements Koopbaar
 
     public function pasToe(ClickPower $clickPower, SaveFile $save): void
     {
-        // Een boerderij levert flink wat koekjes op.
         $clickPower->verhoogPerSecond(10.0);
     }
 }

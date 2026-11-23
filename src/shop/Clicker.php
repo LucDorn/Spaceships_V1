@@ -20,7 +20,7 @@ final class Clicker implements Koopbaar
 
     public function pasToe(ClickPower $clickPower, SaveFile $save): void
     {
-        // Een clicker verdubbelt je clickkracht.
+        // Een clicker verhoogt click kracht.
         $clickPower->verhoogClickPower(1);
     }
 }
