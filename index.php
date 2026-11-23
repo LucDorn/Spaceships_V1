@@ -1,15 +1,16 @@
 <?php
+
+declare(strict_types=1);
+
 ob_start();
 session_start();
 
-require_once './src/AllSrc.php';
+require_once __DIR__ . '/src/AllSrc.php';
 
-$_SESSION['cookies'] = $_SESSION['cookies'] ?? 0;
-$ClickPower = new \cookies\ClickPower();
-$SafeFile   = new \user\SaveFile();
+use cookies\ClickPower;
+use user\SaveFile;
+use shop\Registry;
 
-
-// Send a clean JSON response
 function jsonResponse(array $data, int $code = 200): void
 {
     while (ob_get_level() > 0) ob_end_clean();
@@ -19,134 +20,99 @@ function jsonResponse(array $data, int $code = 200): void
     exit;
 }
 
-// ---- AJAX: click ----
-if (($_POST['action'] ?? '') === 'click') {
+$SaveFile   = new SaveFile();
+$ClickPower = new ClickPower($SaveFile);
+$Shop       = new Registry();
+
+// Passieve inkomsten syncen op basis van verstreken tijd
+$ClickPower->syncTime();
+
+$action = $_POST['action'] ?? '';
+
+// -------- AJAX: click --------
+if ($action === 'click') {
     $ClickPower->cookieClick();
-    jsonResponse(['amount' => $SafeFile->getAmount()]);
-}
-
-// ---- AJAX: buy ----
-if (($_POST['action'] ?? '') === 'buy') {
-    $allowed = ['clicker', 'grandma', 'farm'];
-    $name    = $_POST['name'] ?? '';
-
-    if (!in_array($name, $allowed, true)) {
-        jsonResponse(['error' => 'unknown item', 'amount' => $SafeFile->getAmount()], 400);
-    }
-
-    $result = $SafeFile->buy($name);   // make sure this method exists!
-
     jsonResponse([
-        'ok'     => $result !== false,
-        'amount' => $SafeFile->getAmount(),
-        'gain'   => $ClickPower->getAmount(),
+        'amount'     => $SaveFile->getAmount(),
+        'clickPower' => $ClickPower->getAmount(),
+        'perSecond'  => $ClickPower->getPerSecond(),
     ]);
 }
 
-// ---- Normal page render ----
-// Drop the buffer (strips BOM/warnings) and start fresh.
+// -------- AJAX: tick (elke seconde, voor live UI) --------
+if ($action === 'tick') {
+    jsonResponse([
+        'amount'     => $SaveFile->getAmount(),
+        'clickPower' => $ClickPower->getAmount(),
+        'perSecond'  => $ClickPower->getPerSecond(),
+    ]);
+}
+
+// -------- AJAX: buy --------
+if ($action === 'buy') {
+    $naam = $_POST['name'] ?? '';
+    $item = $Shop->vind($naam);
+
+    if ($item === null) {
+        jsonResponse(['error' => 'Onbekend item'], 400);
+    }
+
+    if (!$SaveFile->kanBetalen($item->getKost())) {
+        jsonResponse([
+            'error'  => 'Te weinig cookies',
+            'amount' => $SaveFile->getAmount(),
+        ], 400);
+    }
+
+    $SaveFile->subtractAmount($item->getKost());
+    $item->pasToe($ClickPower, $SaveFile);
+
+    jsonResponse([
+        'ok'         => true,
+        'amount'     => $SaveFile->getAmount(),
+        'clickPower' => $ClickPower->getAmount(),
+        'perSecond'  => $ClickPower->getPerSecond(),
+    ]);
+}
+
+// -------- Page render --------
 while (ob_get_level() > 0) ob_end_clean();
 
-echo "<div id='cookie-amount'>" . $SafeFile->getAmount() . "</div>";
-echo "<div id='GainEverySecond'>" . $ClickPower->getAmount() . "</div>";
+$items = $Shop->alle();
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="nl">
 
 <head>
     <meta charset="UTF-8">
-    <title>Document</title>
+    <title>Cookie Clicker</title>
+    <link rel="stylesheet" href="public/style.css">
 </head>
 
 <body>
+
+    <h1>🍪 Cookie Clicker</h1>
+
+    <div class="stats">
+        <p>Cookies: <strong id="amount"><?= htmlspecialchars((string) $SaveFile->getAmount()) ?></strong></p>
+        <p>Per klik: <strong id="clickPower"><?= htmlspecialchars((string) $ClickPower->getAmount()) ?></strong></p>
+        <p>Per seconde: <strong id="perSecond"><?= htmlspecialchars((string) $ClickPower->getPerSecond()) ?></strong></p>
+    </div>
+
     <p id="status" aria-live="polite"></p>
-    <div id="cookie-amount" aria-live="polite">0</div>
-    <div id="GainEverySecond" aria-live="polite">0</div>
-    <button id="cookieClick">click on cookie</button>
-    <br><br>
-    <h3>buy</h3>
-    <button id="buyClicker" class="buy" data-item="clicker">clicker: cost 10</button>
-    <button id="buyGrandma" class="buy" data-item="grandma">grandma: cost 100</button>
-    <button id="buyFarm" class="buy" data-item="farm">farm: cost 1000</button>
 
-    <script>
-        const amountEl = document.getElementById('cookie-amount');
-        const gainEl = document.getElementById('GainEverySecond');
-        const statusEl = document.getElementById('status');
+    <button id="cookieClick" class="click-btn">🍪 Klik op de cookie</button>
 
-        async function send(action, extra = {}) {
-            const body = new FormData();
-            body.append('action', action);
-            for (const [k, v] of Object.entries(extra)) body.append(k, v);
+    <h2>Winkel</h2>
+    <div class="shop">
+        <?php foreach ($items as $item): ?>
+            <button class="buy" data-item="<?= htmlspecialchars($item->getNaam()) ?>">
+                <?= htmlspecialchars($item->getNaam()) ?> — <?= htmlspecialchars((string) $item->getKost()) ?> 🍪
+            </button>
+        <?php endforeach; ?>
+    </div>
 
-            const res = await fetch('', {
-                method: 'POST',
-                body
-            });
-            const text = await res.text();
-
-            try {
-                return {
-                    ok: res.ok,
-                    data: JSON.parse(text)
-                };
-            } catch (e) {
-                console.error('Non-JSON response:\n', text);
-                throw new Error('Server gaf geen geldige JSON terug');
-            }
-        }
-
-        function toonStatus(tekst, soort = 'info') {
-            statusEl.textContent = tekst;
-            statusEl.dataset.soort = soort; // voor CSS-kleurtje
-        }
-
-        async function metKnopUit(btn, fn) {
-            btn.disabled = true;
-            try {
-                return await fn();
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
-        // --- Click ---
-        document.getElementById('cookieClick').addEventListener('click', (e) =>
-            metKnopUit(e.currentTarget, async () => {
-                try {
-                    const {
-                        data
-                    } = await send('click');
-                    amountEl.textContent = data.amount;
-                } catch (err) {
-                    toonStatus(err.message, 'error');
-                }
-            })
-        );
-
-        // --- Buy ---
-        document.querySelectorAll('.buy').forEach(btn => {
-            btn.addEventListener('click', () => metKnopUit(btn, async () => {
-                try {
-                    const {
-                        ok,
-                        data
-                    } = await send('buy', {
-                        name: btn.dataset.item
-                    });
-                    if (!ok || data.error) {
-                        toonStatus(data.error ?? 'Aankoop mislukt', 'error');
-                        return;
-                    }
-                    amountEl.textContent = data.amount;
-                    if (data.gain !== undefined) gainEl.textContent = data.gain;
-                    toonStatus(`${btn.dataset.item} gekocht!`, 'success');
-                } catch (err) {
-                    toonStatus(err.message, 'error');
-                }
-            }));
-        });
-    </script>
+    <script src="public/app.js"></script>
 </body>
 
 </html>

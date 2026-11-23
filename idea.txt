@@ -1,5 +1,0 @@
-
-what next:
-2. add array
-
-cd /c/MAMP/htdocs/space/Spaceships_V1/

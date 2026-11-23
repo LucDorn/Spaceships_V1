@@ -1,0 +1,80 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: system-ui, sans-serif;
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    color: #222;
+}
+
+h1 {
+    text-align: center;
+}
+
+.stats {
+    background: #fef6e4;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.stats p {
+    margin: .3rem 0;
+}
+
+.click-btn {
+    display: block;
+    width: 100%;
+    font-size: 1.5rem;
+    padding: 1.5rem;
+    background: #f7d774;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform .1s;
+}
+
+.click-btn:active {
+    transform: scale(.97);
+}
+
+.shop {
+    display: grid;
+    gap: .5rem;
+}
+
+.buy {
+    padding: .8rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+}
+
+.buy:hover {
+    background: #f5f5f5;
+}
+
+button:disabled {
+    opacity: .5;
+    cursor: wait;
+}
+
+#status {
+    min-height: 1.5rem;
+    text-align: center;
+    font-weight: 500;
+}
+
+#status[data-soort="error"] {
+    color: #c0392b;
+}
+
+#status[data-soort="success"] {
+    color: #27ae60;
+}
