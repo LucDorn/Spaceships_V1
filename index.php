@@ -1,9 +1,8 @@
 <?php
-ob_start();               // <- capture EVERYTHING from here on
+ob_start();
 session_start();
 
-require_once './src/SaveFile.php';
-require_once './src/ClickPower.php';
+require_once './src/AllSrc.php';
 
 $_SESSION['cookies'] = $_SESSION['cookies'] ?? 0;
 $ClickPower = new \cookies\ClickPower();
@@ -60,6 +59,9 @@ echo "<div id='GainEverySecond'>" . $ClickPower->getAmount() . "</div>";
 </head>
 
 <body>
+    <p id="status" aria-live="polite"></p>
+    <div id="cookie-amount" aria-live="polite">0</div>
+    <div id="GainEverySecond" aria-live="polite">0</div>
     <button id="cookieClick">click on cookie</button>
     <br><br>
     <h3>buy</h3>
@@ -70,6 +72,7 @@ echo "<div id='GainEverySecond'>" . $ClickPower->getAmount() . "</div>";
     <script>
         const amountEl = document.getElementById('cookie-amount');
         const gainEl = document.getElementById('GainEverySecond');
+        const statusEl = document.getElementById('status');
 
         async function send(action, extra = {}) {
             const body = new FormData();
@@ -81,38 +84,67 @@ echo "<div id='GainEverySecond'>" . $ClickPower->getAmount() . "</div>";
                 body
             });
             const text = await res.text();
+
             try {
-                return JSON.parse(text);
+                return {
+                    ok: res.ok,
+                    data: JSON.parse(text)
+                };
             } catch (e) {
-                // Show the offending raw output so you can find it
-                console.error('Non-JSON response from server:\n', text);
-                throw e;
+                console.error('Non-JSON response:\n', text);
+                throw new Error('Server gaf geen geldige JSON terug');
             }
         }
 
-        document.getElementById('cookieClick').addEventListener('click', () => {
-            send('click')
-                .then(data => {
-                    amountEl.textContent = data.amount;
-                })
-                .catch(err => console.error('Error:', err));
-        });
+        function toonStatus(tekst, soort = 'info') {
+            statusEl.textContent = tekst;
+            statusEl.dataset.soort = soort; // voor CSS-kleurtje
+        }
 
+        async function metKnopUit(btn, fn) {
+            btn.disabled = true;
+            try {
+                return await fn();
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // --- Click ---
+        document.getElementById('cookieClick').addEventListener('click', (e) =>
+            metKnopUit(e.currentTarget, async () => {
+                try {
+                    const {
+                        data
+                    } = await send('click');
+                    amountEl.textContent = data.amount;
+                } catch (err) {
+                    toonStatus(err.message, 'error');
+                }
+            })
+        );
+
+        // --- Buy ---
         document.querySelectorAll('.buy').forEach(btn => {
-            btn.addEventListener('click', () => {
-                send('buy', {
+            btn.addEventListener('click', () => metKnopUit(btn, async () => {
+                try {
+                    const {
+                        ok,
+                        data
+                    } = await send('buy', {
                         name: btn.dataset.item
-                    })
-                    .then(data => {
-                        if (data.error) {
-                            console.warn(data.error);
-                            return;
-                        }
-                        amountEl.textContent = data.amount;
-                        if (data.gain !== undefined) gainEl.textContent = data.gain;
-                    })
-                    .catch(err => console.error('Error:', err));
-            });
+                    });
+                    if (!ok || data.error) {
+                        toonStatus(data.error ?? 'Aankoop mislukt', 'error');
+                        return;
+                    }
+                    amountEl.textContent = data.amount;
+                    if (data.gain !== undefined) gainEl.textContent = data.gain;
+                    toonStatus(`${btn.dataset.item} gekocht!`, 'success');
+                } catch (err) {
+                    toonStatus(err.message, 'error');
+                }
+            }));
         });
     </script>
 </body>
