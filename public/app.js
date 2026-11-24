@@ -3,6 +3,7 @@ const clickPowEl = document.getElementById('clickPower');
 const perSecEl = document.getElementById('perSecond');
 const statusEl = document.getElementById('status');
 
+
 async function send(action, extra = {}) {
     const body = new FormData();
     body.append('action', action);

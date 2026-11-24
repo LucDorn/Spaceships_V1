@@ -74,6 +74,25 @@ if ($action === 'buy') {
         'perSecond'  => $ClickPower->getPerSecond(),
     ]);
 }
+// -------- AJAX: golden (gratis random item) --------
+if ($action === 'golden') {
+    $item = $Shop->random();
+
+    if ($item === null) {
+        jsonResponse(['error' => 'Geen items beschikbaar'], 500);
+    }
+
+    // BELANGRIJK: geen kost aftrekken — het is een gratis reward
+    $item->pasToe($ClickPower, $SaveFile);
+
+    jsonResponse([
+        'ok'         => true,
+        'won'        => $item->getNaam(),
+        'amount'     => $SaveFile->getAmount(),
+        'clickPower' => $ClickPower->getAmount(),
+        'perSecond'  => $ClickPower->getPerSecond(),
+    ]);
+}
 
 // -------- Page render --------
 while (ob_get_level() > 0) ob_end_clean();
@@ -111,7 +130,7 @@ $items = $Shop->alle();
             </button>
         <?php endforeach; ?>
     </div>
-    <script src="public/goldenCookie.js"></script>
+    <script src="public/golden-cookie.js"></script>
     <script src="public/app.js"></script>
 
 </body>

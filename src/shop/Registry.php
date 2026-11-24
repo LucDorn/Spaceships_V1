@@ -34,4 +34,12 @@ final class Registry
     {
         return $this->items;
     }
+
+    public function random(): ?Koopbaar
+    {
+        if ($this->items === []) {
+            return null;
+        }
+        return $this->items[array_rand($this->items)];
+    }
 }

@@ -78,3 +78,32 @@ button:disabled {
 #status[data-soort="success"] {
     color: #27ae60;
 }
+
+.golden-toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #ffd94d, #efa31c);
+    color: #5a2d00;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.15rem;
+    box-shadow: 0 6px 20px rgba(255, 165, 0, .55);
+    z-index: 2147483646;
+    animation: golden-toast-in .35s cubic-bezier(.2, 1.6, .5, 1);
+    pointer-events: none;
+}
+
+@keyframes golden-toast-in {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -20px) scale(.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+}

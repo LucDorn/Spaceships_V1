@@ -3,22 +3,19 @@
 
     /* ==================== CONFIG ==================== */
     const CONFIG = {
-        intervalMs: 10000,   // how often a cookie appears (ms)
-        lifetimeMs: 15000,   // how long it stays if not clicked (0 = forever)
+        intervalMs: 90000,   // elke 90 seconden een gouden cookie
+        lifetimeMs: 8000,    // 8 seconden om te reageren
         size: 80,            // cookie diameter in px
         margin: 24           // min distance from screen edges
+
     };
 
     /* ============== YOUR CODE GOES HERE ==============
        Runs every time the cookie is clicked.
        `count` = total cookies collected so far. */
-    function onCookieClicked(count) {
-        console.log('🍪 Golden cookie collected! Total:', count);
+    function onCookieClicked() {
+        send('golden');
 
-        // Add your own stuff here, e.g.:
-        // document.body.animate([{filter: 'brightness(1.6)' }, {filter: 'brightness(1)' }], {duration: 300 });
-        // playSound('coin.mp3');
-        // addPoints(10);
     }
     /* ================================================= */
 
@@ -32,7 +29,7 @@
 
     const api = {
         config: CONFIG,
-        onClick: onCookieClicked,   // override me any time: goldenCookie.onClick = fn
+        onClick: onCookieClicked,
         start,
         stop,
         spawn: spawnCookie,
@@ -113,7 +110,7 @@
             expireTimer = setTimeout(removeCookie, CONFIG.lifetimeMs);
         }
     }
-
+    // removes cookie from screen 
     function removeCookie() {
         clearTimeout(expireTimer);
         expireTimer = null;
@@ -132,14 +129,15 @@
         clearTimeout(expireTimer);
         expireTimer = null;
 
-        if (el) {                       // little pop-out animation, then delete
+        // golden cookie click animation
+        if (el) {
             el.classList.add('gc-collected');
             setTimeout(() => el.remove(), 300);
         }
 
         clickCount += 1;
         try {
-            api.onClick(clickCount);      // <-- your code runs here
+            api.onClick(clickCount);
         } catch (err) {
             console.error('[goldenCookie] onClick handler threw:', err);
         }

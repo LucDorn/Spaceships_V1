@@ -49,6 +49,10 @@ final class ClickPower
     {
         return $this->perSecond;
     }
+    public function addPerSecond(): void
+    {
+        $this->perSecond;
+    }
 
     public function verdubbelClickPower(): void
     {
