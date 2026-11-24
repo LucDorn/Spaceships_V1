@@ -111,8 +111,9 @@ $items = $Shop->alle();
             </button>
         <?php endforeach; ?>
     </div>
-
+    <script src="public/goldenCookie.js"></script>
     <script src="public/app.js"></script>
+
 </body>
 
 </html>
